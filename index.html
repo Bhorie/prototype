@@ -502,7 +502,13 @@ html[data-theme=dark] .shot .sl,html:not([data-theme=dark]) .shot .sd{display:no
 /* ===== no notes, no tabs, no label, no scrollbar ===== */
 #flowSeg,.tabs,.composer,#notes,.plabel,.vline,#dismiss{display:none!important}
 .scroll,.pscroll{scrollbar-width:none}.scroll::-webkit-scrollbar,.pscroll::-webkit-scrollbar{display:none}
-.pill.open .pbody{height:270px}
+.pill.open .pbody{height:150px}
+.panel{height:142px}
+.pill.open{width:420px}
+.pill.open.translating{width:480px}
+.topic,.ptop{display:none!important}
+.scroll{padding:10px 12px 8px}
+.line{margin-bottom:8px}
 .pill.open,.pill.open.translating{max-width:calc(100% - 48px)}
 html.phone .pill.open .pbody{height:calc(var(--pbody-h,322px) - 52px)}
 html.phone .panel{height:calc(100% - 8px)}
