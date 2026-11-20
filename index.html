@@ -415,7 +415,7 @@ html.phone .app,html.phone .rec{padding-top:54px}
 .pbtns button{height:48px;border-radius:999px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 140ms var(--ease-out),background-color 160ms var(--ease-out)}
 .pbtns button:active{transform:scale(.96)}
 .pb-hl{flex:1;background:#e7c1c7;color:#2b2420}
-.pb-tr{width:48px;flex:none;background:#2c2c2e;color:#fff}
+.pb-tr{flex:1;background:#2c2c2e;color:#fff}
 .pb-tr.on{background:#e7c1c733;color:#e7c1c7}
 .pb-st{flex:1;background:#2c2c2e;color:#fff}
 /* notification banners */
@@ -502,7 +502,7 @@ html[data-theme=dark] .shot .sl,html:not([data-theme=dark]) .shot .sd{display:no
 .hot{position:absolute;top:184px;height:34px;border-radius:8px;cursor:pointer;background:none}
 .hot:hover{background:#714b480a}
 /* ===== no notes, no tabs, no label, no scrollbar ===== */
-#flowSeg,#textBtn,.tabs,.composer,#notes,.plabel,.vline,#dismiss{display:none!important}
+#flowSeg,#textBtn,#markBtn,.tabs,.composer,#notes,.plabel,.vline,#dismiss{display:none!important}
 .scroll,.pscroll{scrollbar-width:none}.scroll::-webkit-scrollbar,.pscroll::-webkit-scrollbar{display:none}
 .pill.open .pbody{height:150px}
 .panel{height:142px}
@@ -618,8 +618,7 @@ html.phone .panel{height:calc(100% - 8px)}
           <span><b><i class="rd"></i>Taking notes<span class="pchip" id="pChipI" hidden>EN → ES</span></b><small id="pSub">Product sync</small></span><span class="tm" id="pT2">00:00</span></div>
         <div class="pw" id="pWave"></div>
         <button class="pcap" id="pCap"><div class="who"><span id="pWho" style="margin:0;color:#fff">Listening…</span><span>Transcript <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg></span></div><div class="ln" id="pLn"></div><div class="og" id="pOg"></div></button>
-        <div class="pbtns"><button class="pb-hl" id="pHl"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 1.6c.45 3.3 2.3 5.15 5.6 5.6-3.3.45-5.15 2.3-5.6 5.6-.45-3.3-2.3-5.15-5.6-5.6 3.3-.45 5.15-2.3 5.6-5.6z"/></svg>Highlight</button>
-          <button class="pb-tr" id="pTr" aria-label="Live translation"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h7M5.5 2v1.5M4 3.5c.6 2.6 2 4.3 4 5.2M7.5 3.5C7 6 5.6 8 3 9.2M8.5 14l3-7 3 7M9.7 11.5h3.6"/></svg></button>
+        <div class="pbtns"><button class="pb-tr" id="pTr" aria-label="Live translation"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h7M5.5 2v1.5M4 3.5c.6 2.6 2 4.3 4 5.2M7.5 3.5C7 6 5.6 8 3 9.2M8.5 14l3-7 3 7M9.7 11.5h3.6"/></svg>Translate</button>
           <button class="pb-st" id="pSt"><svg width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10" rx="2"/></svg>Stop</button></div>
       </div>
     </div>
@@ -699,7 +698,7 @@ html.phone .panel{height:calc(100% - 8px)}
         <div class="item"><span class="txt">Build status — dashboard, upload and record done</span><span class="ts" style="margin-left:auto">00:14</span></div>
         <div class="item"><span class="txt">Pricing — needs sign-off before the email</span><span class="ts" style="margin-left:auto">00:28</span></div>
       </section>
-      <section class="sect"><h3>Your notes &amp; marked moments</h3><div class="yours" id="yours">You didn’t add any notes in this meeting.</div></section>
+      <section class="sect" style="display:none"><h3>Your notes &amp; marked moments</h3><div class="yours" id="yours">You didn’t add any notes in this meeting.</div></section>
     </main>
   </div>
 </div></div></div>
@@ -829,7 +828,7 @@ const wantOpen=()=>{clearTimeout(closeT);if(dragging||performance.now()<(S.armAt
 pill.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')wantOpen();});pill.addEventListener('pointermove',e=>{if(e.pointerType!=='touch')wantOpen();});
 pill.addEventListener('pointerleave',e=>{if(e.pointerType==='touch')return;clearTimeout(openT);if(document.activeElement===$('#noteIn')&&$('#noteIn').value)return;if(pop.classList.contains('on'))return;closeT=setTimeout(()=>setOpen(false),320);});
 $('#collapse').onclick=e=>{e.stopPropagation();setOpen(false);};
-function setOpen(v){if(!pill.classList.contains('on')||S.open===v)return;if(!v)pop.classList.remove('on');S.open=v;pill.classList.toggle('open',v);if(v){focusEl(pill,440);hint('Scroll up for earlier topics · ★ marks a moment');S.userScrolled=false;later(stick,140);}}
+function setOpen(v){if(!pill.classList.contains('on')||S.open===v)return;if(!v)pop.classList.remove('on');S.open=v;pill.classList.toggle('open',v);if(v){focusEl(pill,440);hint('Scroll up for earlier lines');S.userScrolled=false;later(stick,140);}}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=e=>{e.stopPropagation();S.tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));$('#scroll').classList.toggle('off',S.tab!=='t');$('#notes').classList.toggle('on',S.tab==='n');$('#jump').classList.remove('on');});
 
 // ---------- live translation pop-up ----------
@@ -967,9 +966,9 @@ q('#pDeny').onclick=()=>{on('#pAl',false);toast('Cockatoo needs the microphone t
 function start(){P.rec=true;state('compact');hint('Tap the island to see what’s being said');
   P.clock=setInterval(()=>{P.sec++;const t=fmt(P.sec);q('#pT1').textContent=t;q('#pT2').textContent=t;},1000);later(next,900);}
 // island interactions
-isl.addEventListener('click',e=>{if(e.target.closest('button'))return;if(P.isl==='compact'){state('exp');sizeIsl();hint('Highlight a moment · translate · or tap the line for the full transcript');}});
+isl.addEventListener('click',e=>{if(e.target.closest('button'))return;if(P.isl==='compact'){state('exp');sizeIsl();hint('Translate, or tap the line for the full transcript');}});
 q('#stage').addEventListener('pointerdown',e=>{if(!document.documentElement.classList.contains('phone'))return;if(P.isl==='exp'&&!e.target.closest('#isl,#pAct,#pSheet'))state('compact');},true);
-q('#pHl').onclick=()=>{P.marks++;q('#pSub').textContent=P.marks+' highlight'+(P.marks>1?'s':'');const m=document.createElement('div');m.className='pmk';m.textContent='★ You highlighted this moment · '+fmt(P.sec);sc.appendChild(m);stick();toast('Moment highlighted');};
+const _noHl=()=>{P.marks++;q('#pSub').textContent=P.marks+' highlight'+(P.marks>1?'s':'');const m=document.createElement('div');m.className='pmk';m.textContent='★ You highlighted this moment · '+fmt(P.sec);sc.appendChild(m);stick();toast('Moment highlighted');};
 q('#pTr').onclick=q('#pTr2').onclick=()=>on('#pAct');
 q('#pCap').onclick=()=>openSheet(true);
 q('#pClose').onclick=q('#pScrim').onclick=()=>openSheet(false);
