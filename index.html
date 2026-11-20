@@ -781,7 +781,7 @@ const wave=$('#wave');for(let i=0;i<12;i++)wave.appendChild(document.createEleme
 const pill=$('#pill');
 const K=()=>KS;
 const easeOut=t=>1-Math.pow(1-t,3);
-function measureClosed(){const k=K(),p=pill.getBoundingClientRect(),st=$('#stop').getBoundingClientRect();pill.style.setProperty('--w-closed',Math.ceil((st.right-p.left)/k+8)+'px');}
+function measureClosed(){const k=K(),p=pill.getBoundingClientRect(),st=$('#stop').getBoundingClientRect();pill.style.setProperty('--w-closed',Math.ceil((st.right-p.left)/k+14)+'px');}
 function startRecording(){
   pill.style.setProperty('--w-closed','600px');measureClosed();S.armAt=performance.now()+700;show('#pill');hint((matchMedia('(pointer:coarse)').matches?'Tap':'Hover')+' the pill · try the translate button for live translation');
   S.clock=setInterval(()=>{S.sec++;$('#time').textContent=fmt(S.sec);},1000);
