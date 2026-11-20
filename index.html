@@ -34,15 +34,34 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tnum{font-variant-numeric:tabular-nums}
 
 /* ---------- prototype chrome ---------- */
-.topbar{position:fixed;inset:0 0 auto 0;height:52px;display:flex;align-items:center;gap:12px;padding:0 20px;color:#d9d4d1;font-size:13px;z-index:50}
+.topbar{position:fixed;inset:0 0 auto 0;min-height:52px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:11px 20px;color:#d9d4d1;font-size:13px;z-index:50}
 .topbar b{font-weight:600;color:#fff}
 .topbar .sp{flex:1}
 .chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:#ffffff12;color:#e8e3e0;font-weight:500}
 .chip:hover{background:#ffffff1f}
 .hint{color:#a49d99}
-.stagewrap{position:fixed;inset:52px 0 0 0;display:grid;place-items:center}
-.stage{width:1440px;height:900px;transform-origin:center;position:relative;border-radius:16px;overflow:hidden;box-shadow:0 30px 80px #0008}
+.stagewrap{position:fixed;inset:var(--tb,52px) 0 var(--hb,0px) 0;display:flex;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none}
+.stagewrap::-webkit-scrollbar{display:none}
+.sizer{margin:auto;position:relative;flex:none}
+.stage{width:1440px;height:900px;transform-origin:0 0;position:absolute;left:0;top:0;border-radius:16px;overflow:hidden;box-shadow:0 30px 80px #0008}
 
+@media (max-width:760px){
+  .topbar{padding:10px 12px;gap:8px;font-size:12px}
+  .topbar>.hint:first-of-type,.topbar .sp{display:none}
+  .topbar b{margin-right:auto}
+  .chip{height:28px;padding:0 10px}
+  .seg button{height:24px;padding:0 10px}
+  #flowSeg{order:3}
+  #hint{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 16px calc(12px + env(safe-area-inset-bottom));text-align:center;font-size:13px;color:#d9d4d1;background:#121214;border-top:1px solid #ffffff14}
+}
+@media (max-height:500px) and (min-width:761px){
+  .topbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:8px 12px;gap:8px;font-size:12px;white-space:nowrap}
+  .topbar::-webkit-scrollbar{display:none}
+  .topbar>.hint:first-of-type,.topbar .sp{display:none}
+  #hint{margin-left:auto}
+  .chip{height:28px;padding:0 10px;flex:none}.seg{flex:none}.seg button{height:24px;padding:0 10px}
+}
+.pbar{touch-action:none}
 /* ---------- neutral video call (stand-in for Meet/Teams/Zoom web) ---------- */
 .call{position:absolute;inset:0;background:#202124;color:#e3e3e3}
 .bbar{height:44px;background:#2b2c2f;display:flex;align-items:center;padding:0 18px;gap:8px}
@@ -282,7 +301,7 @@ body[data-text=gradient] .typing{display:none}
   <button class="chip" id="restart">Restart</button>
 </div>
 
-<div class="stagewrap"><div class="stage" id="stage">
+<div class="stagewrap" id="wrap"><div class="sizer" id="sizer"><div class="stage" id="stage">
   <div class="call" id="call">
     <div class="bbar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">meet.example.com/abc-defg-hij</div></div>
     <div class="grid">
@@ -421,13 +440,25 @@ body[data-text=gradient] .typing{display:none}
       <section class="sect"><h3>Your notes &amp; marked moments</h3><div class="yours" id="yours">You didn’t add any notes in this meeting.</div></section>
     </main>
   </div>
-</div></div>
+</div></div></div>
 
 <script>
 const $=s=>document.querySelector(s);
 const stage=$('#stage');
-function fit(){const w=innerWidth-48,h=innerHeight-52-32;stage.style.transform=`scale(${Math.min(w/1440,h/900,1)})`;}
+const wrap=$('#wrap'),sizer=$('#sizer'),mob=()=>innerWidth<=760||matchMedia('(pointer:coarse)').matches;
+let KS=1;
+function fit(){const R=document.documentElement.style,tb=$('.topbar').offsetHeight;R.setProperty('--tb',tb+'px');
+  const hb=innerWidth<=760?$('#hint').offsetHeight:0;R.setProperty('--hb',hb+'px');
+  const pad=innerWidth<=760?12:24,aw=innerWidth-pad*2,ah=innerHeight-tb-hb-pad*2,fk=Math.min(aw/1440,ah/900,1);
+  KS=fk>=.5?fk:Math.min(1,Math.max(aw/1440,Math.min(.62,aw/620)));   /* phones: keep text legible, pan instead */
+  stage.style.transform=`scale(${KS})`;sizer.style.width=1440*KS+'px';sizer.style.height=900*KS+'px';sizer.style.margin=`auto`;
+  wrap.style.padding=pad+'px';}
 addEventListener('resize',fit);fit();
+stage.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||!S||!S.open)return;if(e.target.closest('#pill,#pop'))return;setOpen(false);});
+/* on small screens, glide the view to whatever just changed */
+function focusEl(el,delay=0){if(!el)return;setTimeout(()=>{if(wrap.scrollWidth<=wrap.clientWidth+2&&wrap.scrollHeight<=wrap.clientHeight+2)return;
+  const r=el.getBoundingClientRect(),w=wrap.getBoundingClientRect();
+  wrap.scrollTo({left:wrap.scrollLeft+(r.left+r.width/2)-(w.left+w.width/2),top:wrap.scrollTop+(r.top+Math.min(r.height,w.height)/2)-(w.top+w.height/2),behavior:'smooth'});},delay);}
 let textMode='grey';$('#textBtn').onclick=()=>{textMode=textMode==='grey'?'gradient':'grey';document.body.dataset.text=textMode;$('#textBtn').textContent='Live text: '+(textMode==='grey'?'Grey':'Gradient');};
 let theme='light';$('#themeBtn').onclick=()=>{theme=theme==='light'?'dark':'light';document.documentElement.dataset.theme=theme;$('#themeBtn').textContent=theme==='light'?'Dark theme':'Light theme';};
 
@@ -451,8 +482,8 @@ const SCRIPT=[
 let S, timers=[];
 const later=(fn,ms)=>{const t=setTimeout(fn,ms);timers.push(t);return t;};
 function clearAll(){timers.forEach(clearTimeout);timers=[];clearInterval(S&&S.clock);cancelAnimationFrame(S&&S.raf);}
-const show=(id,on=true)=>$(id).classList.toggle('on',on);
-function hint(t){$('#hint').textContent=t;}
+const show=(id,on=true)=>{const el=$(id);el.classList.toggle('on',on);if(on)focusEl(id==='#app'||id==='#rec'?(id==='#rec'?$('#bigRec'):el):el,60);};
+function hint(t){$('#hint').textContent=t;if(innerWidth<=760)fit();}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800);}
 
 function reset(){
@@ -481,13 +512,13 @@ $('#allow').onclick=()=>{show('#cAllow',false);later(startRecording,220);};
 // ---------- recording ----------
 const wave=$('#wave');for(let i=0;i<12;i++)wave.appendChild(document.createElement('i'));
 const pill=$('#pill');
-const K=()=>stage.getBoundingClientRect().width/1440;
+const K=()=>KS;
 const easeOut=t=>1-Math.pow(1-t,3);
 function measureClosed(){// sum the visible controls so the closed pill hugs its content exactly
   const k=K();const kids=[...$('#pbar').children];let w=14+8;kids.forEach((c,i)=>{const r=c.getBoundingClientRect().width/k;const ml=parseFloat(getComputedStyle(c).marginLeft)||0;w+=r+ml+(i?10:0);});
   pill.style.setProperty('--w-closed',Math.ceil(w)+10+'px');}
 function startRecording(){
-  pill.style.setProperty('--w-closed','600px');measureClosed();S.armAt=performance.now()+700;show('#pill');hint('Hover the pill · try the translate button for live translation');
+  pill.style.setProperty('--w-closed','600px');measureClosed();S.armAt=performance.now()+700;show('#pill');hint((matchMedia('(pointer:coarse)').matches?'Tap':'Hover')+' the pill · try the translate button for live translation');
   S.clock=setInterval(()=>{S.sec++;$('#time').textContent=fmt(S.sec);},1000);
   // waveform: smooth per-frame easing toward a moving target (no jumps)
   const bars=[...wave.children],cur=bars.map(()=>4),tgt=bars.map(()=>4);let last=0;
@@ -530,10 +561,10 @@ $('#jump').onclick=()=>{S.userScrolled=false;stick();$('#jump').classList.remove
 // ---------- hover to expand (intent delays so it never flickers) ----------
 let openT,closeT;
 const wantOpen=()=>{clearTimeout(closeT);if(dragging||performance.now()<(S.armAt||0)||S.open)return;clearTimeout(openT);openT=setTimeout(()=>setOpen(true),120);};
-pill.addEventListener('pointerenter',wantOpen);pill.addEventListener('pointermove',wantOpen);
-pill.addEventListener('pointerleave',e=>{clearTimeout(openT);if(document.activeElement===$('#noteIn')&&$('#noteIn').value)return;if(pop.classList.contains('on'))return;closeT=setTimeout(()=>setOpen(false),320);});
+pill.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')wantOpen();});pill.addEventListener('pointermove',e=>{if(e.pointerType!=='touch')wantOpen();});
+pill.addEventListener('pointerleave',e=>{if(e.pointerType==='touch')return;clearTimeout(openT);if(document.activeElement===$('#noteIn')&&$('#noteIn').value)return;if(pop.classList.contains('on'))return;closeT=setTimeout(()=>setOpen(false),320);});
 $('#collapse').onclick=e=>{e.stopPropagation();setOpen(false);};
-function setOpen(v){if(!pill.classList.contains('on')||S.open===v)return;if(!v)pop.classList.remove('on');S.open=v;pill.classList.toggle('open',v);if(v){hint('Scroll up for earlier topics · try My notes and ★');S.userScrolled=false;later(stick,140);}}
+function setOpen(v){if(!pill.classList.contains('on')||S.open===v)return;if(!v)pop.classList.remove('on');S.open=v;pill.classList.toggle('open',v);if(v){focusEl(pill,440);hint('Scroll up for earlier topics · try My notes and ★');S.userScrolled=false;later(stick,140);}}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=e=>{e.stopPropagation();S.tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));$('#scroll').classList.toggle('off',S.tab!=='t');$('#notes').classList.toggle('on',S.tab==='n');$('#jump').classList.remove('on');});
 
 // ---------- live translation pop-up ----------
@@ -541,7 +572,7 @@ const pop=$('#pop');
 function placePop(){const b=$('#trBtn').getBoundingClientRect(),o=$('#ov').getBoundingClientRect(),k=K();pop.style.left=((b.right-o.left)/k-232)+'px';pop.style.top=((b.bottom-o.top)/k+8)+'px';}
 $('#trBtn').onclick=e=>{e.stopPropagation();placePop();pop.classList.toggle('on');};
 pop.addEventListener('pointerenter',()=>clearTimeout(closeT));
-pop.addEventListener('pointerleave',()=>{closeT=setTimeout(()=>{pop.classList.remove('on');setOpen(false);},400);});
+pop.addEventListener('pointerleave',e=>{if(e.pointerType==='touch')return;closeT=setTimeout(()=>{pop.classList.remove('on');setOpen(false);},400);});
 addEventListener('pointerdown',e=>{if(pop.classList.contains('on')&&!e.target.closest('#pop')&&!e.target.closest('#trBtn'))pop.classList.remove('on');});
 pop.querySelectorAll('.row[data-l]').forEach(r=>r.onclick=()=>{const l=r.dataset.l;if(l==='more')return;S.lang=l==='off'?null:l;
   pop.querySelectorAll('.row').forEach(x=>x.classList.toggle('sel',x===r));
@@ -560,9 +591,9 @@ $('#markBtn').onclick=e=>{e.stopPropagation();const b=e.currentTarget;b.classLis
 // ---------- drag: follows the pointer, eases to the nearest side on release ----------
 let dragging=false,d0;
 $('#pbar').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;clearTimeout(openT);const r=pill.getBoundingClientRect(),sr=stage.getBoundingClientRect(),k=K();
-  dragging=true;d0={x:e.clientX,y:e.clientY,l:(r.left-sr.left)/k,t:(r.top-sr.top)/k-44,w:r.width/k,k};pill.classList.add('dragging');pill.style.left=d0.l+'px';pill.style.right='auto';pill.setPointerCapture(e.pointerId);});
-addEventListener('pointermove',e=>{if(!dragging)return;const nx=d0.l+(e.clientX-d0.x)/d0.k,ny=Math.max(12,Math.min(760,d0.t+(e.clientY-d0.y)/d0.k));pill.style.left=nx+'px';pill.style.top=ny+'px';});
-addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;const cx=parseFloat(pill.style.left)+d0.w/2;const goLeft=cx<720;
+  dragging=true;d0={css:pill.style.cssText,pt:e.pointerType,moved:false,x:e.clientX,y:e.clientY,l:(r.left-sr.left)/k,t:(r.top-sr.top)/k-44,w:r.width/k,k};pill.classList.add('dragging');pill.style.left=d0.l+'px';pill.style.right='auto';pill.setPointerCapture(e.pointerId);});
+addEventListener('pointermove',e=>{if(!dragging)return;if(Math.hypot(e.clientX-d0.x,e.clientY-d0.y)>6)d0.moved=true;const nx=d0.l+(e.clientX-d0.x)/d0.k,ny=Math.max(12,Math.min(760,d0.t+(e.clientY-d0.y)/d0.k));pill.style.left=nx+'px';pill.style.top=ny+'px';});
+addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;if(d0.pt==='touch'&&!d0.moved){pill.classList.remove('dragging');pill.style.cssText=d0.css;setOpen(!S.open);if(!S.open)hint('Tap the pill to open the live transcript');return;}const cx=parseFloat(pill.style.left)+d0.w/2;const goLeft=cx<720;
   pill.classList.remove('dragging');
   // animate to the edge, then hand anchoring to that edge so expanding grows inward
   const target=goLeft?24:1440-24-d0.w;pill.style.left=target+'px';
