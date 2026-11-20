@@ -502,7 +502,7 @@ html[data-theme=dark] .shot .sl,html:not([data-theme=dark]) .shot .sd{display:no
 .hot{position:absolute;top:184px;height:34px;border-radius:8px;cursor:pointer;background:none}
 .hot:hover{background:#714b480a}
 /* ===== no notes, no tabs, no label, no scrollbar ===== */
-#flowSeg,.tabs,.composer,#notes,.plabel,.vline,#dismiss{display:none!important}
+#flowSeg,#textBtn,.tabs,.composer,#notes,.plabel,.vline,#dismiss{display:none!important}
 .scroll,.pscroll{scrollbar-width:none}.scroll::-webkit-scrollbar,.pscroll::-webkit-scrollbar{display:none}
 .pill.open .pbody{height:150px}
 .panel{height:142px}
@@ -516,7 +516,7 @@ html.phone .pill.open .pbody{height:calc(var(--pbody-h,322px) - 52px)}
 html.phone .panel{height:calc(100% - 8px)}
 </style>
 </head>
-<body>
+<body data-text="gradient">
 <div class="topbar">
   <b>Cockatoo</b><span class="hint">Meeting notes · interactive prototype</span>
   <span class="seg" id="flowSeg"><button class="on" data-f="meet">In a meeting</button><button data-f="rec">Click to record</button></span>
@@ -725,7 +725,7 @@ stage.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||!S||!S.open
 function focusEl(el,delay=0){if(!el)return;setTimeout(()=>{if(wrap.scrollWidth<=wrap.clientWidth+2&&wrap.scrollHeight<=wrap.clientHeight+2)return;
   const r=el.getBoundingClientRect(),w=wrap.getBoundingClientRect();
   wrap.scrollTo({left:wrap.scrollLeft+(r.left+r.width/2)-(w.left+w.width/2),top:wrap.scrollTop+(r.top+Math.min(r.height,w.height)/2)-(w.top+w.height/2),behavior:'smooth'});},delay);}
-let textMode='grey';$('#textBtn').onclick=()=>{textMode=textMode==='grey'?'gradient':'grey';document.body.dataset.text=textMode;$('#textBtn').textContent='Live text: '+(textMode==='grey'?'Grey':'Gradient');};
+let textMode='gradient';$('#textBtn').onclick=()=>{textMode=textMode==='grey'?'gradient':'grey';document.body.dataset.text=textMode;$('#textBtn').textContent='Live text: '+(textMode==='grey'?'Grey':'Gradient');};
 let theme='light';$('#themeBtn').onclick=()=>{theme=theme==='light'?'dark':'light';document.documentElement.dataset.theme=theme;$('#themeBtn').textContent=theme==='light'?'Dark theme':'Light theme';};
 
 // ---------- script of the meeting ----------
